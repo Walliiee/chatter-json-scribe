@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnalysisResult } from '@/types/conversation';
 
@@ -16,16 +16,12 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
     value
   }));
 
-  const sentimentData = [
-    { name: 'Positive', value: analysisResult.sentimentDistribution.positive, color: '#00C49F' },
-    { name: 'Neutral', value: analysisResult.sentimentDistribution.neutral, color: '#FFBB28' },
-    { name: 'Negative', value: analysisResult.sentimentDistribution.negative, color: '#FF8042' }
-  ];
-
   const engagementData = [
-    { name: 'Short (<50 chars)', value: analysisResult.userEngagement.shortResponses },
-    { name: 'Medium (50-200 chars)', value: analysisResult.userEngagement.mediumResponses },
-    { name: 'Long (>200 chars)', value: analysisResult.userEngagement.longResponses }
+    { name: 'Short (≤1K)', value: analysisResult.userEngagement.shortResponses },
+    { name: 'Medium (1K-10K)', value: analysisResult.userEngagement.mediumResponses },
+    { name: 'Long (10K-25K)', value: analysisResult.userEngagement.longResponses },
+    { name: 'Very Long (25K-40K)', value: analysisResult.userEngagement.veryLongResponses },
+    { name: 'Extremely Long (>40K)', value: analysisResult.userEngagement.extremelyLongResponses }
   ];
 
   return (
@@ -62,8 +58,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
         </Card>
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-6">
         {/* Categories Chart */}
         <Card>
           <CardHeader>
@@ -81,44 +77,17 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
             </ResponsiveContainer>
           </CardContent>
         </Card>
-
-        {/* Sentiment Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Sentiment Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={sentimentData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {sentimentData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Additional Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* User Engagement */}
+        {/* Response Length Distribution */}
         <Card>
           <CardHeader>
             <CardTitle>Response Length Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={engagementData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -136,12 +105,12 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
             <CardTitle>Top Topics</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {analysisResult.topTopics.slice(0, 8).map((topic, index) => (
+            <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+              {analysisResult.topTopics.slice(0, 15).map((topic, index) => (
                 <div key={topic.topic} className="flex items-center justify-between">
                   <span className="text-sm font-medium capitalize">{topic.topic}</span>
                   <div className="flex items-center space-x-2">
-                    <div className="w-20 bg-gray-200 rounded-full h-2">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-blue-500 h-2 rounded-full"
                         style={{ 

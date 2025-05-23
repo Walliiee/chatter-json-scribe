@@ -38,5 +38,7 @@ export interface AnalysisResult {
     shortResponses: number;
     mediumResponses: number;
     longResponses: number;
+    veryLongResponses: number;
+    extremelyLongResponses: number;
   };
 }

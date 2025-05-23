@@ -18,10 +18,10 @@ export class ConversationAnalyzer {
     // Analyze sentiment (simplified)
     const sentimentDistribution = this.analyzeSentiment(conversations);
     
-    // Extract topics
+    // Extract topics with enhanced analysis
     const topTopics = this.extractTopics(conversations);
     
-    // Analyze user engagement
+    // Analyze user engagement with new length categories
     const userEngagement = this.analyzeUserEngagement(conversations);
 
     return {
@@ -134,9 +134,32 @@ export class ConversationAnalyzer {
     const topicCounts: { [key: string]: number } = {};
     
     const commonTopics = [
-      'javascript', 'python', 'react', 'programming', 'code', 'development',
-      'writing', 'story', 'creative', 'help', 'support', 'question',
-      'error', 'bug', 'fix', 'learn', 'tutorial', 'explanation'
+      // Programming languages & technologies
+      'javascript', 'python', 'react', 'typescript', 'java', 'c++', 'rust', 'go', 
+      'swift', 'kotlin', 'ruby', 'php', 'html', 'css', 'sql', 'nosql', 'mongodb',
+      
+      // Development areas
+      'programming', 'code', 'development', 'frontend', 'backend', 'fullstack', 'database',
+      'api', 'sdk', 'framework', 'library', 'devops', 'architecture', 'design pattern',
+      
+      // AI & ML
+      'ai', 'machine learning', 'neural network', 'deep learning', 'nlp', 'transformer',
+      'llm', 'gpt', 'claude', 'bert', 'embedding', 'vector', 'prompt engineering',
+      
+      // Creative content
+      'writing', 'story', 'creative', 'blog', 'article', 'fiction', 'novel',
+      'poem', 'lyrics', 'content', 'marketing', 'copywriting',
+      
+      // Help & Support
+      'help', 'support', 'question', 'answer', 'explain', 'explanation', 'guide',
+      'tutorial', 'issue', 'error', 'bug', 'fix', 'debug', 'problem', 'solution',
+      
+      // Education
+      'learn', 'education', 'course', 'training', 'teach', 'study', 'school', 'university',
+      
+      // Business 
+      'business', 'startup', 'entrepreneur', 'marketing', 'strategy', 'product',
+      'service', 'customer', 'revenue', 'growth', 'analytics', 'data'
     ];
 
     conversations.forEach(conv => {
@@ -152,27 +175,39 @@ export class ConversationAnalyzer {
     return Object.entries(topicCounts)
       .map(([topic, frequency]) => ({ topic, frequency }))
       .sort((a, b) => b.frequency - a.frequency)
-      .slice(0, 10);
+      .slice(0, 15); // Increase the number of topics we show
   }
 
   private static analyzeUserEngagement(conversations: Conversation[]) {
-    let shortResponses = 0;
-    let mediumResponses = 0;
-    let longResponses = 0;
+    let shortResponses = 0;      // 1-1,000 chars
+    let mediumResponses = 0;     // 1,000-10,000 chars
+    let longResponses = 0;       // 10,000-25,000 chars
+    let veryLongResponses = 0;   // 25,000-40,000 chars
+    let extremelyLongResponses = 0; // >40,000 chars
 
     conversations.forEach(conv => {
       conv.turns.forEach(turn => {
         const length = turn.content.length;
-        if (length < 50) {
+        if (length <= 1000) {
           shortResponses++;
-        } else if (length < 200) {
+        } else if (length <= 10000) {
           mediumResponses++;
-        } else {
+        } else if (length <= 25000) {
           longResponses++;
+        } else if (length <= 40000) {
+          veryLongResponses++;
+        } else {
+          extremelyLongResponses++;
         }
       });
     });
 
-    return { shortResponses, mediumResponses, longResponses };
+    return { 
+      shortResponses, 
+      mediumResponses, 
+      longResponses, 
+      veryLongResponses, 
+      extremelyLongResponses 
+    };
   }
 }
