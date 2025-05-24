@@ -23,7 +23,8 @@ export interface AnalysisResult {
   totalTurns: number;
   averageTurnsPerConversation: number;
   categories: {
-    [category: string]: number;
+    main: { [category: string]: number };
+    sub: { [category: string]: { [subCategory: string]: number } };
   };
   sentimentDistribution: {
     positive: number;
@@ -35,10 +36,17 @@ export interface AnalysisResult {
     frequency: number;
   }>;
   userEngagement: {
-    shortResponses: number;
-    mediumResponses: number;
-    longResponses: number;
-    veryLongResponses: number;
-    extremelyLongResponses: number;
+    veryShortResponses: number;    // <5,000 chars
+    shortResponses: number;        // 5,000-15,000 chars
+    mediumResponses: number;       // 15,000-30,000 chars
+    longResponses: number;         // 30,000-50,000 chars
+    veryLongResponses: number;     // 50,000-75,000 chars
+    extremelyLongResponses: number; // 75,000-100,000 chars
+    massiveResponses: number;      // >100,000 chars
+    topFiveLongest: Array<{
+      length: number;
+      excerpt: string;
+      conversationId: string;
+    }>;
   };
 }
