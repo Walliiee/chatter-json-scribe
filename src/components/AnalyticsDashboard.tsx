@@ -3,6 +3,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Treemap, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnalysisResult } from '@/types/conversation';
+import { Info } from 'lucide-react';
 
 interface AnalyticsDashboardProps {
   analysisResult: AnalysisResult;
@@ -59,6 +60,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{analysisResult.totalConversations}</div>
+            <p className="text-xs text-gray-500 mt-1">Number of conversation threads analyzed</p>
           </CardContent>
         </Card>
         
@@ -68,6 +70,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{analysisResult.totalTurns}</div>
+            <p className="text-xs text-gray-500 mt-1">Total back-and-forth exchanges</p>
           </CardContent>
         </Card>
         
@@ -79,6 +82,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
             <div className="text-2xl font-bold text-purple-600">
               {analysisResult.averageTurnsPerConversation.toFixed(1)}
             </div>
+            <p className="text-xs text-gray-500 mt-1">Average conversation length</p>
           </CardContent>
         </Card>
       </div>
@@ -86,41 +90,65 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
       {/* Main Categories */}
       <Card>
         <CardHeader>
-          <CardTitle>Main Conversation Categories</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <span>Primary Topic Categories</span>
+            <Info className="w-4 h-4 text-gray-400" />
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            High-level categorization of conversations by primary subject matter
+          </p>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={mainCategoryData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#0088FE" />
-            </BarChart>
-          </ResponsiveContainer>
+          {mainCategoryData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={mainCategoryData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#0088FE" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-gray-500">
+              No conversations have been categorized yet. Upload data to see categories.
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Subcategories Treemap */}
       <Card>
         <CardHeader>
-          <CardTitle>Detailed Category Breakdown</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <span>Detailed Topic Breakdown</span>
+            <Info className="w-4 h-4 text-gray-400" />
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Granular view of conversation topics with relative sizing by frequency
+          </p>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={400}>
-            <Treemap
-              data={treemapData}
-              dataKey="value"
-              aspectRatio={4/3}
-              stroke="#fff"
-              fill="#8884d8"
-            >
-              {treemapData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-              <Tooltip content={<CustomTooltip />} />
-            </Treemap>
-          </ResponsiveContainer>
+          {treemapData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={400}>
+              <Treemap
+                data={treemapData}
+                dataKey="value"
+                aspectRatio={4/3}
+                stroke="#fff"
+                fill="#8884d8"
+              >
+                {treemapData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+                <Tooltip content={<CustomTooltip />} />
+              </Treemap>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[400px] flex items-center justify-center text-gray-500">
+              No detailed categories available. Upload more data to see breakdown.
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -129,7 +157,13 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
         {/* Response Length Distribution */}
         <Card>
           <CardHeader>
-            <CardTitle>Response Length Distribution</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <span>Message Length Distribution</span>
+              <Info className="w-4 h-4 text-gray-400" />
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              Distribution of all messages by character count
+            </p>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -147,26 +181,38 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
         {/* Top 5 Longest Responses */}
         <Card>
           <CardHeader>
-            <CardTitle>Top 5 Longest Responses</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <span>Longest Messages</span>
+              <Info className="w-4 h-4 text-gray-400" />
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              The five longest individual messages in your dataset
+            </p>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 max-h-[300px] overflow-y-auto">
-              {analysisResult.userEngagement.topFiveLongest.map((response, index) => (
-                <div key={index} className="border rounded-lg p-3 bg-gray-50">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-sm font-medium text-blue-600">#{index + 1}</span>
-                    <span className="text-sm text-gray-600 font-mono">
-                      {response.length.toLocaleString()} chars
-                    </span>
+              {analysisResult.userEngagement.topFiveLongest.length > 0 ? (
+                analysisResult.userEngagement.topFiveLongest.map((response, index) => (
+                  <div key={index} className="border rounded-lg p-3 bg-gray-50">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-sm font-medium text-blue-600">#{index + 1}</span>
+                      <span className="text-sm text-gray-600 font-mono">
+                        {response.length.toLocaleString()} chars
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-700 mb-1">
+                      Conversation: {response.conversationId}
+                    </p>
+                    <p className="text-sm text-gray-800 italic">
+                      "{response.excerpt}"
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-700 mb-1">
-                    Conversation: {response.conversationId}
-                  </p>
-                  <p className="text-sm text-gray-800 italic">
-                    "{response.excerpt}"
-                  </p>
+                ))
+              ) : (
+                <div className="text-gray-500 text-center py-8">
+                  No message data available
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -175,26 +221,38 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ analysisResult 
       {/* Top Topics */}
       <Card>
         <CardHeader>
-          <CardTitle>Top Topics</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <span>Most Frequent Topics</span>
+            <Info className="w-4 h-4 text-gray-400" />
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Keywords and terms that appear most frequently across all conversations
+          </p>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-            {analysisResult.topTopics.slice(0, 15).map((topic, index) => (
-              <div key={topic.topic} className="flex items-center justify-between">
-                <span className="text-sm font-medium capitalize">{topic.topic}</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-500 h-2 rounded-full"
-                      style={{ 
-                        width: `${Math.min((topic.frequency / Math.max(...analysisResult.topTopics.map(t => t.frequency))) * 100, 100)}%` 
-                      }}
-                    />
+            {analysisResult.topTopics.length > 0 ? (
+              analysisResult.topTopics.slice(0, 15).map((topic, index) => (
+                <div key={topic.topic} className="flex items-center justify-between">
+                  <span className="text-sm font-medium capitalize">{topic.topic}</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ 
+                          width: `${Math.min((topic.frequency / Math.max(...analysisResult.topTopics.map(t => t.frequency))) * 100, 100)}%` 
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm text-gray-600 w-8">{topic.frequency}</span>
                   </div>
-                  <span className="text-sm text-gray-600 w-8">{topic.frequency}</span>
                 </div>
+              ))
+            ) : (
+              <div className="text-gray-500 text-center py-8">
+                No topics extracted yet. Upload conversation data to see topics.
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>
