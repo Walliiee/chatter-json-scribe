@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FileUpload from '@/components/FileUpload';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import DataTable from '@/components/DataTable';
-import { ConversationAnalyzer } from '@/components/ConversationAnalyzer';
+import { ConversationAnalyzer } from '@/utils/ConversationAnalyzer';
 import { AnalysisResult } from '@/types/conversation';
 import { BarChart3, FileJson, Upload } from 'lucide-react';
 
@@ -18,9 +17,13 @@ const Index = () => {
     setUploadedData(data);
     
     // Analyze the data
-    const result = ConversationAnalyzer.analyzeConversations(data);
-    console.log('Analysis result:', result);
-    setAnalysisResult(result);
+    try {
+      const result = ConversationAnalyzer.analyzeConversations(data);
+      console.log('Analysis result:', result);
+      setAnalysisResult(result);
+    } catch (error) {
+      console.error('Error analyzing conversations:', error);
+    }
   };
 
   return (
