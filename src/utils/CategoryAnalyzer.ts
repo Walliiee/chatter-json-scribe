@@ -3,42 +3,36 @@ import { Conversation } from '@/types/conversation';
 
 export class CategoryAnalyzer {
   static categorizeConversations(conversations: Conversation[]) {
-    console.log('Starting categorization for', conversations.length, 'conversations');
+    console.log('=== CategoryAnalyzer: Starting categorization ===');
+    console.log('Input conversations:', conversations.length);
     
     const mainCategories: { [key: string]: number } = {};
     const subCategories: { [key: string]: { [key: string]: number } } = {};
 
+    // Improved keyword lists with safer matching
     const categoryKeywords = {
       'Technical': {
         'Web Development': [
-          'html', 'css', 'javascript', 'js', 'react', 'vue', 'angular', 'svelte',
-          'frontend', 'backend', 'fullstack', 'node.js', 'express', 'next.js',
-          'webpack', 'vite', 'npm', 'yarn', 'typescript', 'tsx', 'jsx',
-          'dom', 'browser', 'web', 'website', 'webapp', 'component'
+          'html', 'css', 'javascript', 'react', 'vue', 'angular', 'svelte',
+          'frontend', 'backend', 'fullstack', 'nodejs', 'express', 'nextjs',
+          'webpack', 'vite', 'npm', 'yarn', 'typescript', 'component',
+          'dom', 'browser', 'web', 'website', 'webapp'
         ],
         'Mobile Development': [
           'ios', 'android', 'swift', 'kotlin', 'react native', 'flutter',
-          'mobile app', 'xamarin', 'ionic', 'cordova', 'phonegap'
+          'mobile app', 'xamarin', 'ionic', 'app store', 'play store'
         ],
         'AI/ML Development': [
           'machine learning', 'artificial intelligence', 'neural network',
-          'deep learning', 'tensorflow', 'pytorch', 'ai', 'ml', 'llm',
-          'model', 'training', 'algorithm', 'data science'
+          'deep learning', 'tensorflow', 'pytorch', 'model', 'training',
+          'algorithm', 'data science', 'nlp', 'computer vision'
         ],
         'Database Engineering': [
-          'sql', 'database', 'mysql', 'postgresql', 'mongodb', 'nosql',
+          'database', 'mysql', 'postgresql', 'mongodb', 'nosql',
           'query', 'sqlite', 'redis', 'elasticsearch', 'orm', 'prisma'
         ],
-        'DevOps': [
-          'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'deployment',
-          'ci/cd', 'jenkins', 'github actions', 'terraform', 'ansible'
-        ],
-        'System Design': [
-          'architecture', 'scalability', 'microservices', 'api design',
-          'load balancing', 'distributed', 'system', 'performance'
-        ],
         'Programming Languages': [
-          'python', 'java', 'c++', 'c#', 'go', 'rust', 'php', 'ruby',
+          'python', 'java', 'golang', 'rust', 'php', 'ruby',
           'scala', 'kotlin', 'dart', 'programming', 'code', 'coding'
         ]
       },
@@ -49,37 +43,38 @@ export class CategoryAnalyzer {
         'Operations': ['operations', 'process', 'efficiency', 'workflow', 'management']
       },
       'Creative': {
-        'Design': ['design', 'ui', 'ux', 'graphic', 'visual', 'branding', 'logo'],
+        'Design': ['design', 'user interface', 'user experience', 'graphic', 'visual', 'branding'],
         'Writing': ['writing', 'content', 'copywriting', 'blog', 'article'],
         'Media': ['video', 'audio', 'photography', 'editing', 'production']
       },
       'Educational': {
         'Learning': ['learn', 'study', 'education', 'tutorial', 'course'],
-        'Research': ['research', 'analysis', 'data', 'study', 'investigation'],
+        'Research': ['research', 'analysis', 'investigation', 'academic'],
         'Teaching': ['teach', 'explain', 'instruction', 'guide', 'help']
-      },
-      'Personal': {
-        'Lifestyle': ['lifestyle', 'health', 'fitness', 'wellness', 'personal'],
-        'Productivity': ['productivity', 'time management', 'organization', 'planning'],
-        'Career': ['career', 'job', 'interview', 'resume', 'professional']
       }
     };
 
     conversations.forEach((conv, index) => {
-      const allText = conv.turns.map(turn => turn.content).join(' ').toLowerCase();
-      console.log(`Analyzing conversation ${index}:`, allText.substring(0, 100) + '...');
+      const allText = conv.turns
+        .map(turn => turn.content)
+        .join(' ')
+        .toLowerCase();
+      
+      console.log(`Analyzing conversation ${index} (${conv.id}):`, allText.substring(0, 100) + '...');
       
       let categorized = false;
       
+      // Use safer keyword matching
       for (const [mainCat, subCats] of Object.entries(categoryKeywords)) {
         for (const [subCat, keywords] of Object.entries(subCats)) {
           const foundKeyword = keywords.find(keyword => {
-            const regex = new RegExp(`\\b${keyword.toLowerCase()}\\b`, 'i');
-            return regex.test(allText);
+            // Use simple includes for better reliability
+            return allText.includes(keyword.toLowerCase());
           });
           
           if (foundKeyword) {
             console.log(`Found keyword "${foundKeyword}" - categorizing as ${mainCat} > ${subCat}`);
+            
             mainCategories[mainCat] = (mainCategories[mainCat] || 0) + 1;
             
             if (!subCategories[mainCat]) {
@@ -104,7 +99,10 @@ export class CategoryAnalyzer {
       }
     });
 
-    console.log('Final categorization results:', { main: mainCategories, sub: subCategories });
+    console.log('=== CategoryAnalyzer: Completed categorization ===');
+    console.log('Main categories:', mainCategories);
+    console.log('Sub categories:', subCategories);
+    
     return {
       main: mainCategories,
       sub: subCategories

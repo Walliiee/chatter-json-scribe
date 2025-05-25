@@ -106,7 +106,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
                 {getStatusText()}
               </p>
               <p className="text-sm text-gray-500">
-                Supports JSON files with conversational AI data
+                Supports ChatGPT exports, Claude exports, and custom conversation formats
               </p>
             </div>
 
@@ -114,6 +114,58 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload }) => {
               <FileJson className="w-4 h-4" />
               <span>JSON format only</span>
             </div>
+          </div>
+        </div>
+
+        {/* Updated Format Examples */}
+        <div className="mt-6 space-y-4 text-sm">
+          <div>
+            <p className="font-medium text-gray-700 mb-2">✅ ChatGPT Export Format</p>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-xs">
+{`{
+  "conversation_id": "abc123",
+  "mapping": {
+    "node1": {
+      "message": {
+        "author": {"role": "user"},
+        "content": {"parts": ["Hello, how are you?"]}
+      }
+    },
+    "node2": {
+      "message": {
+        "author": {"role": "assistant"},
+        "content": {"parts": ["I'm doing well, thank you!"]}
+      }
+    }
+  }
+}`}
+            </pre>
+          </div>
+          
+          <div>
+            <p className="font-medium text-gray-700 mb-2">✅ Simple Messages Format</p>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-xs">
+{`{
+  "messages": [
+    {"role": "user", "content": "What is React?"},
+    {"role": "assistant", "content": "React is a JavaScript library..."}
+  ]
+}`}
+            </pre>
+          </div>
+
+          <div>
+            <p className="font-medium text-gray-700 mb-2">✅ Array of Conversations</p>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-xs">
+{`[
+  {
+    "conversation": [
+      {"role": "user", "content": "Help me with Python"},
+      {"role": "assistant", "content": "I'd be happy to help!"}
+    ]
+  }
+]`}
+            </pre>
           </div>
         </div>
       </CardContent>
