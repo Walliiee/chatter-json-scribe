@@ -10,10 +10,15 @@ interface CategoryChartProps {
 }
 
 const CategoryChart: React.FC<CategoryChartProps> = ({ analysisResult }) => {
-  const mainCategoryData = Object.entries(analysisResult.categories.main).map(([name, value]) => ({
+  // Add safety checks and better error handling
+  const mainCategories = analysisResult?.categories?.main ?? {};
+  const mainCategoryData = Object.entries(mainCategories).map(([name, value]) => ({
     name,
-    value
+    value: Number(value) || 0
   }));
+
+  console.log('CategoryChart - Main categories:', mainCategories);
+  console.log('CategoryChart - Chart data:', mainCategoryData);
 
   return (
     <Card>
@@ -39,7 +44,10 @@ const CategoryChart: React.FC<CategoryChartProps> = ({ analysisResult }) => {
           </ResponsiveContainer>
         ) : (
           <div className="h-[300px] flex items-center justify-center text-gray-500">
-            No conversations have been categorized yet. Upload data to see categories.
+            <div className="text-center">
+              <p className="text-lg font-medium mb-2">No categories found</p>
+              <p className="text-sm">The uploaded data may not contain categorizable content.</p>
+            </div>
           </div>
         )}
       </CardContent>

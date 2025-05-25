@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,25 +7,55 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import DataTable from '@/components/DataTable';
 import { ConversationAnalyzer } from '@/utils/ConversationAnalyzer';
 import { AnalysisResult } from '@/types/conversation';
-import { BarChart3, FileJson, Upload } from 'lucide-react';
+import { BarChart3, FileJson, Upload, AlertCircle } from 'lucide-react';
 
 const Index = () => {
   const [uploadedData, setUploadedData] = useState<any[]>([]);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
-  const handleFileUpload = (data: any[]) => {
+  const handleFileUpload = async (data: any[]) => {
     console.log('File uploaded:', data);
     setUploadedData(data);
+    setIsAnalyzing(true);
+    setAnalysisError(null);
     
-    // Analyze the data
+    // Analyze the data with better error handling
     try {
+      console.log('Starting analysis of', data.length, 'items...');
       const result = ConversationAnalyzer.analyzeConversations(data);
-      console.log('Analysis result:', result);
+      console.log('Analysis completed successfully:', result);
       setAnalysisResult(result);
     } catch (error) {
       console.error('Error analyzing conversations:', error);
+      setAnalysisError(error instanceof Error ? error.message : 'Unknown analysis error');
+      // Still show dashboard with empty results for debugging
+      setAnalysisResult({
+        totalConversations: 0,
+        totalTurns: 0,
+        averageTurnsPerConversation: 0,
+        categories: { main: {}, sub: {} },
+        sentimentDistribution: { positive: 0, negative: 0, neutral: 0 },
+        topTopics: [],
+        userEngagement: {
+          veryShortResponses: 0,
+          shortResponses: 0,
+          mediumResponses: 0,
+          longResponses: 0,
+          veryLongResponses: 0,
+          extremelyLongResponses: 0,
+          massiveResponses: 0,
+          topFiveLongest: []
+        }
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
+
+  // Show dashboard if we have uploaded data, regardless of analysis success
+  const showDashboard = uploadedData.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -85,8 +116,62 @@ const Index = () => {
           </div>
         )}
 
+        {/* Analysis Status */}
+        {isAnalyzing && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full" />
+                  <span className="text-lg">Analyzing {uploadedData.length} items...</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Analysis Error */}
+        {analysisError && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <AlertCircle className="w-6 h-6 text-red-500" />
+                  <div>
+                    <p className="text-red-800 font-medium">Analysis Error</p>
+                    <p className="text-red-700 text-sm">{analysisError}</p>
+                    <p className="text-red-600 text-xs mt-1">Dashboard will show with limited data for debugging.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Debug Information */}
+        {uploadedData.length > 0 && (
+          <div className="max-w-2xl mx-auto mb-6">
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="p-4">
+                <h3 className="font-medium text-blue-800 mb-2">Debug Information</h3>
+                <div className="text-sm text-blue-700 space-y-1">
+                  <p>• Uploaded items: {uploadedData.length}</p>
+                  <p>• Analysis result: {analysisResult ? 'Available' : 'Not available'}</p>
+                  {analysisResult && (
+                    <>
+                      <p>• Conversations found: {analysisResult.totalConversations}</p>
+                      <p>• Total turns: {analysisResult.totalTurns}</p>
+                      <p>• Categories: {Object.keys(analysisResult.categories.main).length}</p>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Analysis Results */}
-        {uploadedData.length > 0 && analysisResult && (
+        {showDashboard && (
           <div className="space-y-6">
             {/* Quick Actions */}
             <div className="flex justify-between items-center">
@@ -96,6 +181,7 @@ const Index = () => {
                   onClick={() => {
                     setUploadedData([]);
                     setAnalysisResult(null);
+                    setAnalysisError(null);
                   }}
                   className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors flex items-center space-x-2"
                 >
@@ -119,7 +205,19 @@ const Index = () => {
               </TabsList>
               
               <TabsContent value="analytics" className="mt-6">
-                <AnalyticsDashboard analysisResult={analysisResult} />
+                {analysisResult ? (
+                  <AnalyticsDashboard analysisResult={analysisResult} />
+                ) : (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Analysis Failed</h3>
+                      <p className="text-gray-600">
+                        Unable to process the uploaded data. Please check the format and try again.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
               
               <TabsContent value="data" className="mt-6">
